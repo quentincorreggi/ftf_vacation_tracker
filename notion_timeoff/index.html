@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FTF — Time Off</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sand:#FBF6EC; --shell:#FFFFFF; --sea:#0E7C86; --sea-deep:#0A5C64;
+    --sky:#D8EFEC; --coral:#FF7A59; --ink:#243B43; --muted:#7C9098;
+    --line:#E7DFCD; --band-alt:#FAF4E6; --wk:#F2EAD7;
+    --t-vacation:#0E7C86; --t-rtt:#5B8DEF; --t-remote:#E0A100; --t-sick:#C8607A;
+    --r:14px; --shadow:0 1px 2px rgba(36,59,67,.06), 0 6px 20px rgba(36,59,67,.06);
+    --namew:128px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:"Nunito",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:var(--sand);-webkit-font-smoothing:antialiased;padding:18px;line-height:1.45}
+  .wrap{max-width:1040px;margin:0 auto}
+
+  header.app{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+  .mark{width:42px;height:42px;border-radius:12px;flex:0 0 auto;background:radial-gradient(circle at 30% 28%, #FFD27A 0 24%, transparent 25%),linear-gradient(160deg,var(--sea) 0%, var(--sea-deep) 100%);box-shadow:var(--shadow)}
+  h1{font-family:"Fredoka",sans-serif;font-weight:700;font-size:22px;margin:0;letter-spacing:.2px}
+  h1 small{display:block;font-family:"Nunito";font-weight:600;font-size:12.5px;color:var(--muted);letter-spacing:.3px;text-transform:uppercase}
+  .grow{flex:1 1 auto}
+  .pill{display:inline-flex;align-items:center;gap:7px;background:var(--shell);border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-weight:700;font-size:13px;box-shadow:var(--shadow)}
+  .pill .dot{width:8px;height:8px;border-radius:50%;background:var(--coral)}
+
+  .banner{background:var(--sky);border:1px solid #Bfe0db;border-radius:var(--r);padding:11px 14px;font-size:13.5px;font-weight:600;color:var(--sea-deep);margin-bottom:14px;display:flex;gap:10px;align-items:flex-start}
+  .banner b{font-weight:800}
+  .banner code{background:#ffffff80;padding:1px 5px;border-radius:5px;font-size:12px}
+  .banner .x{margin-left:auto;cursor:pointer;color:var(--sea-deep);opacity:.6;font-weight:800;border:0;background:none;font-size:15px}
+
+  .card{background:var(--shell);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+  .form{padding:14px;margin-bottom:14px}
+  .form-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr auto;gap:10px;align-items:end}
+  label.fld{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  input,select{font-family:inherit;font-size:14px;font-weight:600;color:var(--ink);background:var(--sand);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%}
+  input:focus,select:focus{outline:2px solid var(--sea);outline-offset:1px;background:#fff}
+  .btn{font-family:"Fredoka",sans-serif;font-weight:600;font-size:14.5px;color:#fff;background:var(--sea);border:0;border-radius:10px;padding:10px 18px;cursor:pointer;white-space:nowrap;transition:transform .06s ease, background .15s;height:40px}
+  .btn:hover{background:var(--sea-deep)}
+  .btn:active{transform:translateY(1px)}
+  .btn[disabled]{opacity:.6;cursor:default}
+  .err{color:var(--t-sick);font-size:12.5px;font-weight:700;margin:8px 2px 0;min-height:0}
+
+  .toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 2px 10px}
+  .nav{display:flex;align-items:center;gap:4px}
+  .nav button{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--shell);cursor:pointer;font-size:16px;color:var(--ink);font-weight:800;display:grid;place-items:center;box-shadow:var(--shadow)}
+  .nav button:hover{border-color:var(--sea);color:var(--sea)}
+  .month{font-family:"Fredoka";font-weight:600;font-size:18px;min-width:180px;text-align:center}
+  .today-btn{font-size:12.5px;font-weight:800;color:var(--sea);background:none;border:0;cursor:pointer;text-transform:uppercase;letter-spacing:.4px}
+  .seg{display:flex;gap:2px;background:var(--shell);border:1px solid var(--line);border-radius:10px;padding:2px;box-shadow:var(--shadow)}
+  .segbtn{border:0;background:none;font-family:"Nunito";font-weight:800;font-size:12.5px;color:var(--muted);padding:6px 12px;border-radius:8px;cursor:pointer;white-space:nowrap}
+  .segbtn.active{background:var(--sea);color:#fff}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-left:auto}
+  .lg{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--muted)}
+  .lg i{width:14px;height:10px;border-radius:4px;display:inline-block}
+
+  .timeline{padding:8px 8px 12px;overflow-x:auto}
+  .tl-inner{min-width:760px}
+  .tl-head{display:flex;margin-bottom:2px}
+  .tl-head .spacer{flex:0 0 var(--namew);width:var(--namew)}
+  .tl-axis{position:relative;flex:1 1 auto;height:20px}
+  .mlabel{position:absolute;top:0;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding-left:6px;border-left:1px solid var(--line);line-height:20px}
+  .tl-row{display:flex;align-items:stretch;border-top:1px solid var(--line)}
+  .name{flex:0 0 var(--namew);width:var(--namew);font-weight:800;font-size:13.5px;padding:0 8px 0 4px;display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .track{position:relative;flex:1 1 auto}
+  .band{position:absolute;top:0;bottom:0;z-index:0}
+  .band.alt{background:var(--band-alt)}
+  .monthline{position:absolute;top:0;bottom:0;width:1px;background:var(--line);z-index:1}
+  .wkline{position:absolute;top:0;bottom:0;width:1px;background:var(--wk);z-index:1}
+  .todayline{position:absolute;top:0;bottom:0;width:2px;background:var(--coral);opacity:.85;z-index:4}
+  .bar{position:absolute;height:22px;border-radius:7px;display:flex;align-items:center;padding:0 8px;font-size:11.5px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.14);z-index:2}
+  .bar.clip-l{border-top-left-radius:2px;border-bottom-left-radius:2px}
+  .bar.clip-r{border-top-right-radius:2px;border-bottom-right-radius:2px}
+  .empty{padding:34px 16px;text-align:center;color:var(--muted)}
+  .empty b{display:block;font-family:"Fredoka";font-size:16px;color:var(--ink);font-weight:600;margin-bottom:4px}
+
+  .list{margin-top:14px;padding:6px 4px}
+  .list h2{font-family:"Fredoka";font-weight:600;font-size:15px;margin:8px 10px 6px}
+  .row{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:10px}
+  .row+.row{border-top:1px solid var(--line)}
+  .swatch{width:10px;height:28px;border-radius:5px;flex:0 0 auto}
+  .row .who{font-weight:800;font-size:14px}
+  .row .when{font-size:12.5px;color:var(--muted);font-weight:600}
+  .row .tag{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;padding:3px 8px;border-radius:999px}
+  .row .note{font-size:12.5px;color:var(--muted);font-weight:600;font-style:italic}
+  .row .del{margin-left:auto;border:0;background:none;cursor:pointer;color:var(--muted);font-weight:800;font-size:13px;padding:6px 8px;border-radius:8px}
+  .row .del:hover{color:var(--t-sick);background:#FBEEF1}
+
+  .sync{font-size:11.5px;font-weight:700;color:var(--muted);margin:10px 4px 0;text-align:right}
+  .sync b{color:var(--sea)}
+
+  @media (max-width:680px){
+    .form-grid{grid-template-columns:1fr 1fr}
+    .form-grid .btn{grid-column:1 / -1}
+    :root{--namew:96px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="app">
+    <div class="mark" aria-hidden="true"></div>
+    <h1>Time Off<small>First Things First</small></h1>
+    <div class="grow"></div>
+    <span class="pill" id="offNow"><span class="dot"></span><span id="offNowText">Nobody off today</span></span>
+  </header>
+
+  <div class="banner" id="banner" style="display:none">
+    <span>🏖️ <b>Preview mode.</b> Showing sample data so you can try every feature. Entries you add here are temporary and not shared. Once deployed on Vercel with storage connected, it syncs live for the whole team.</span>
+    <button class="x" id="bannerX" title="Hide">✕</button>
+  </div>
+
+  <div class="card form">
+    <div class="form-grid">
+      <label class="fld">Who
+        <select id="f-name">
+          <option value="" disabled selected>Select…</option>
+        </select>
+      </label>
+      <label class="fld">From
+        <input id="f-start" type="date">
+      </label>
+      <label class="fld">To
+        <input id="f-end" type="date">
+      </label>
+      <label class="fld">Type
+        <select id="f-type">
+          <option value="vacation">Vacation</option>
+          <option value="rtt">RTT</option>
+          <option value="remote">Remote</option>
+          <option value="sick">Sick</option>
+        </select>
+      </label>
+      <button class="btn" id="addBtn">Add time off</button>
+    </div>
+    <div class="err" id="formErr"></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="nav">
+      <button id="prevP" title="Previous">‹</button>
+      <div class="month" id="rangeLabel">—</div>
+      <button id="nextP" title="Next">›</button>
+    </div>
+    <button class="today-btn" id="todayBtn">Today</button>
+    <div class="seg" id="viewSeg">
+      <button class="segbtn" data-view="person">Person</button>
+      <button class="segbtn" data-view="team">Team</button>
+    </div>
+    <div class="seg" id="spanSeg">
+      <button class="segbtn" data-months="1">Month</button>
+      <button class="segbtn" data-months="3">Quarter</button>
+      <button class="segbtn" data-months="6">6 mo</button>
+    </div>
+    <div class="legend">
+      <span class="lg"><i style="background:var(--t-vacation)"></i>Vacation</span>
+      <span class="lg"><i style="background:var(--t-rtt)"></i>RTT</span>
+      <span class="lg"><i style="background:var(--t-remote)"></i>Remote</span>
+      <span class="lg"><i style="background:var(--t-sick)"></i>Sick</span>
+    </div>
+  </div>
+
+  <div class="card timeline">
+    <div class="tl-inner" id="timeline"></div>
+  </div>
+
+  <div class="card list">
+    <h2>All upcoming time off</h2>
+    <div id="listBody"></div>
+  </div>
+
+  <div class="sync" id="syncStatus"></div>
+
+</div>
+
+<script>
+/* ============================================================
+   TEAM ROSTER
+   ------------------------------------------------------------
+   The "Who" dropdown is built from this list, so names are always
+   spelled and matched consistently. Edit it to your real team.
+   (Later option: load these from a Notion People database instead.)
+   ============================================================ */
+const TEAM = ["Alex","Jordan","Lou","Maya","Nina","Sam","Théo"];
+
+/* ============================================================
+   BACKEND
+   ------------------------------------------------------------
+   The page talks to its own /api/timeoff function, which reads and
+   writes entries to Vercel-managed storage (Upstash Redis, provisioned
+   from the Vercel Marketplace).
+   API_BASE = "" means same-origin (host on the same Vercel project).
+
+   ALIGN WITH YOUR ROADMAP via URL parameters on the embed, e.g.:
+     ?months=3&start=2026-07-01     -> Jul–Sep 2026
+     ?from=2026-07-01&to=2026-09-30 -> same, explicit range
+   ============================================================ */
+const API_BASE = "";
+const POLL_MS = 30000;
+
+const TYPES = { vacation:{label:"Vacation"}, rtt:{label:"RTT"}, remote:{label:"Remote"}, sick:{label:"Sick"} };
+const TYPE_COLOR = { vacation:"#0E7C86", rtt:"#5B8DEF", remote:"#E0A100", sick:"#C8607A" };
+
+/* ---------- date helpers ---------- */
+const pad = n => String(n).padStart(2,"0");
+const toISO = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const dnum = iso => Math.floor(Date.parse(iso+"T00:00:00Z")/86400000);
+const todayISO = toISO(new Date());
+function fmtRange(s,e){
+  const o={day:"numeric",month:"short"};
+  const sd=new Date(s+"T00:00"), ed=new Date(e+"T00:00");
+  if(s===e) return sd.toLocaleDateString(undefined,o);
+  return `${sd.toLocaleDateString(undefined,o)} – ${ed.toLocaleDateString(undefined,{...o,year:ed.getFullYear()!==sd.getFullYear()?"numeric":undefined})}`;
+}
+const uid = () => (crypto?.randomUUID?.() || ("tmp"+Date.now()+Math.random().toString(16).slice(2)));
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const byStart = (a,b)=> a.start<b.start?-1:a.start>b.start?1:(a.end<b.end?-1:1);
+
+/* sample data — only shown in preview mode, never when connected to Notion */
+function sampleData(){
+  const d=off=>{ const x=new Date(); x.setDate(x.getDate()+off); return toISO(x); };
+  return [
+    {id:uid(), name:"Alex",   start:d(-2), end:d(2),  type:"vacation", note:"Surf trip"},
+    {id:uid(), name:"Maya",   start:d(0),  end:d(0),  type:"remote",   note:""},
+    {id:uid(), name:"Sam",    start:d(1),  end:d(5),  type:"vacation", note:""},
+    {id:uid(), name:"Jordan", start:d(-1), end:d(0),  type:"sick",     note:""},
+    {id:uid(), name:"Lou",    start:d(3),  end:d(8),  type:"rtt",      note:""},
+    {id:uid(), name:"Maya",   start:d(20), end:d(24), type:"vacation", note:""},
+    {id:uid(), name:"Alex",   start:d(34), end:d(45), type:"vacation", note:"Summer break"},
+    {id:uid(), name:"Sam",    start:d(60), end:d(62), type:"remote",   note:""}
+  ];
+}
+
+/* ============================================================
+   STORE
+   ============================================================ */
+function makeStore(){
+  let cache=[], listeners=[], mode="loading", lastSync=null, seeded=false;
+  const emit=()=>listeners.forEach(fn=>fn(cache.slice()));
+  const banner=document.getElementById("banner");
+  const setMode=m=>{ mode=m; if(banner) banner.style.display=(m==="preview")?"":"none"; renderSync(); };
+
+  function renderSync(){
+    const el=document.getElementById("syncStatus");
+    if(mode==="live") el.innerHTML=`<b>●</b> Synced — live for the team${lastSync?` · updated ${lastSync}`:""}`;
+    else if(mode==="preview") el.textContent="Preview mode — changes are not saved";
+    else el.textContent="";
+  }
+  async function load(){
+    try{
+      const r=await fetch(API_BASE+"/api/timeoff",{cache:"no-store"});
+      if(!r.ok) throw 0;
+      const data=await r.json();
+      if(!Array.isArray(data)) throw 0;
+      cache=data; lastSync=new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+      setMode("live"); emit();
+    }catch{
+      if(mode!=="live"){
+        if(!seeded && cache.length===0){ cache=sampleData(); seeded=true; }
+        setMode("preview"); emit();
+      }
+    }
+  }
+  return {
+    subscribe(fn){ listeners.push(fn); fn(cache.slice()); },
+    async add(e){
+      cache=cache.concat(e); emit();
+      if(mode!=="live") return;
+      const r=await fetch(API_BASE+"/api/timeoff",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(e)});
+      if(!r.ok){ const d=await r.json().catch(()=>({})); await load(); throw new Error(d.error||("HTTP "+r.status)); }
+      await load();
+    },
+    async remove(id){
+      cache=cache.filter(x=>x.id!==id); emit();
+      if(mode!=="live") return;
+      const r=await fetch(API_BASE+"/api/timeoff?id="+encodeURIComponent(id),{method:"DELETE"});
+      await load();
+      if(!r.ok){ const d=await r.json().catch(()=>({})); throw new Error(d.error||("HTTP "+r.status)); }
+    },
+    start(){ load(); setInterval(load, POLL_MS); }
+  };
+}
+const store = makeStore();
+
+/* ============================================================
+   VISIBLE RANGE + VIEW MODE
+   ============================================================ */
+let months = 3, anchor, viewMode = "person";
+(function initRange(){
+  const qs=new URLSearchParams(location.search);
+  const mp=parseInt(qs.get("months")); if(mp) months=Math.min(12,Math.max(1,mp));
+  const fromP=qs.get("from"), startP=qs.get("start");
+  let base = fromP ? new Date(fromP+"T00:00") : startP ? new Date(startP+"T00:00") : new Date();
+  if(isNaN(base)) base=new Date();
+  anchor=new Date(base.getFullYear(), base.getMonth(), 1);
+  const toP=qs.get("to");
+  if(fromP && toP){ const t=new Date(toP+"T00:00"); if(!isNaN(t)) months=Math.max(1,(t.getFullYear()-base.getFullYear())*12+(t.getMonth()-base.getMonth())+1); }
+  if(qs.get("view")==="team") viewMode="team";
+})();
+function currentRange(){
+  const from=new Date(anchor.getFullYear(), anchor.getMonth(), 1);
+  const to  =new Date(anchor.getFullYear(), anchor.getMonth()+months, 0);
+  return {from:toISO(from), to:toISO(to)};
+}
+function rangeLabel(){
+  const {from,to}=currentRange();
+  const f=new Date(from+"T00:00"), t=new Date(to+"T00:00");
+  if(months===1) return f.toLocaleDateString(undefined,{month:"long",year:"numeric"});
+  const fM=f.toLocaleDateString(undefined,{month:"short"}), tM=t.toLocaleDateString(undefined,{month:"short"});
+  return f.getFullYear()===t.getFullYear() ? `${fM} – ${tM} ${t.getFullYear()}` : `${fM} ${f.getFullYear()} – ${tM} ${t.getFullYear()}`;
+}
+
+/* ============================================================
+   STATE + RENDER
+   ============================================================ */
+let entries=[];
+store.subscribe(list=>{
+  entries=list.slice().sort(byStart);
+  render();
+});
+
+function render(){ renderOffNow(); renderTimeline(); renderList(); document.getElementById("rangeLabel").textContent=rangeLabel(); }
+
+function renderOffNow(){
+  const off=[...new Set(entries.filter(e=> e.start<=todayISO && todayISO<=e.end).map(e=>e.name))];
+  document.getElementById("offNowText").textContent =
+    off.length===0 ? "Nobody off today" : off.length===1 ? `${off[0]} is off today` : `${off.length} people off today`;
+}
+
+function renderTimeline(){
+  const {from,to}=currentRange();
+  const D0=dnum(from), total=dnum(to)-D0+1;
+  const pct = iso => (dnum(iso)-D0)/total*100;
+  const tl=document.getElementById("timeline");
+  const inRange=entries.filter(e=> e.start<=to && e.end>=from);
+
+  // month segments
+  const segs=[];
+  for(let i=0;i<months;i++){
+    const s=new Date(anchor.getFullYear(), anchor.getMonth()+i, 1);
+    const e=new Date(anchor.getFullYear(), anchor.getMonth()+i+1, 0);
+    segs.push({sIso:toISO(s), eIso:toISO(e), date:s});
+  }
+
+  // header (drop name spacer in Team view so the axis fills the width)
+  const spacer = viewMode==="person" ? `<div class="spacer"></div>` : "";
+  let head=`<div class="tl-head">${spacer}<div class="tl-axis">`;
+  segs.forEach((s,i)=>{
+    const lbl=s.date.toLocaleDateString(undefined,{month:"short"})+((s.date.getMonth()===0||i===0)?` ${s.date.getFullYear()}`:"");
+    head+=`<div class="mlabel" style="left:${pct(s.sIso)}%">${lbl}</div>`;
+  });
+  head+=`</div></div>`;
+
+  if(inRange.length===0){
+    tl.innerHTML=head+`<div class="empty"><b>No time off in this window</b>Nobody booked between ${fmtRange(from,to)}. Use the arrows or span buttons to look elsewhere.</div>`;
+    return;
+  }
+
+  // shared background grid
+  let grid="";
+  segs.forEach((s,i)=>{
+    const left=pct(s.sIso), w=(dnum(s.eIso)-dnum(s.sIso)+1)/total*100;
+    grid+=`<div class="band ${i%2?"alt":""}" style="left:${left}%;width:${w}%"></div>`;
+    if(i>0) grid+=`<div class="monthline" style="left:${left}%"></div>`;
+  });
+  let wd=new Date(from+"T00:00"); while(wd.getDay()!==1) wd.setDate(wd.getDate()+1);
+  while(toISO(wd)<=to){ const L=pct(toISO(wd)); if(L>0.2&&L<99.8) grid+=`<div class="wkline" style="left:${L}%"></div>`; wd.setDate(wd.getDate()+7); }
+  if(todayISO>=from && todayISO<=to) grid+=`<div class="todayline" style="left:${pct(todayISO)}%"></div>`;
+
+  const barH=22, gap=4, padV=6;
+  function barHTML(it, top, labelText){
+    const s=it.start<from?from:it.start, e=it.end>to?to:it.end;
+    const left=pct(s), w=(dnum(e)-dnum(s)+1)/total*100;
+    const c=TYPE_COLOR[it.type]||"#888";
+    const clipL=it.start<from?"clip-l":"", clipR=it.end>to?"clip-r":"";
+    return `<div class="bar ${clipL} ${clipR}" style="left:${left}%;width:calc(${w}% - 3px);top:${top}px;background:${c}" title="${esc(it.name)} · ${esc(TYPES[it.type]?.label||"")} · ${fmtRange(it.start,it.end)}">${esc(labelText)}</div>`;
+  }
+  const daysOf=it=>{ const s=it.start<from?from:it.start, e=it.end>to?to:it.end; return dnum(e)-dnum(s)+1; };
+
+  let rows="";
+  if(viewMode==="person"){
+    // one row per person; a 2nd lane only if a person's own ranges overlap
+    const names=[...new Set(inRange.map(e=>e.name))].sort((a,b)=>a.localeCompare(b));
+    for(const name of names){
+      const items=inRange.filter(x=>x.name===name).sort(byStart);
+      const laneEnds=[], placed=[];
+      for(const it of items){
+        let li=laneEnds.findIndex(end=> end<dnum(it.start));
+        if(li===-1){ li=laneEnds.length; laneEnds.push(dnum(it.end)); } else laneEnds[li]=dnum(it.end);
+        placed.push({it,li});
+      }
+      const laneCount=Math.max(1,laneEnds.length);
+      const rowH=padV*2+laneCount*barH+(laneCount-1)*gap;
+      let bars="";
+      for(const {it,li} of placed){
+        const lbl = daysOf(it)>=4 ? (TYPES[it.type]?.label||"") : "";
+        bars+=barHTML(it, padV+li*(barH+gap), lbl);
+      }
+      rows+=`<div class="tl-row"><div class="name" title="${esc(name)}">${esc(name)}</div><div class="track" style="height:${rowH}px">${grid}${bars}</div></div>`;
+    }
+  } else {
+    // Team view: pack ALL holidays; new line only where they overlap; label = name
+    const all=inRange.slice().sort(byStart);
+    const laneEnds=[], laneItems=[];
+    for(const it of all){
+      let li=laneEnds.findIndex(end=> end<dnum(it.start));
+      if(li===-1){ li=laneEnds.length; laneEnds.push(dnum(it.end)); laneItems.push([]); } else laneEnds[li]=dnum(it.end);
+      laneItems[li].push(it);
+    }
+    const laneH=padV*2+barH;
+    for(const lane of laneItems){
+      let bars="";
+      for(const it of lane){
+        const lbl = daysOf(it)>=3 ? it.name : "";
+        bars+=barHTML(it, padV, lbl);
+      }
+      rows+=`<div class="tl-row"><div class="track" style="height:${laneH}px">${grid}${bars}</div></div>`;
+    }
+  }
+  tl.innerHTML=head+rows;
+}
+
+function renderList(){
+  const future=entries.filter(e=> e.end>=todayISO);
+  const body=document.getElementById("listBody");
+  if(future.length===0){
+    body.innerHTML=`<div class="empty" style="padding:20px"><b>Nothing booked yet</b>Upcoming time off will show here.</div>`;
+    return;
+  }
+  body.innerHTML=future.map(e=>{
+    const color=TYPE_COLOR[e.type]||"#888", label=TYPES[e.type]?.label||"";
+    return `<div class="row">
+      <span class="swatch" style="background:${color}"></span>
+      <div><div class="who">${esc(e.name)}</div><div class="when">${fmtRange(e.start,e.end)}</div></div>
+      <span class="tag" style="background:${color}22;color:${color}">${label}</span>
+      ${e.note?`<span class="note">“${esc(e.note)}”</span>`:""}
+      <button class="del" data-id="${esc(e.id)}" title="Remove">Remove</button>
+    </div>`;
+  }).join("");
+  body.querySelectorAll(".del").forEach(b=>b.onclick=async()=>{ try{ await store.remove(b.dataset.id); }catch(err){ document.getElementById("formErr").textContent="Couldn't remove: "+err.message; } });
+}
+
+/* ============================================================
+   CONTROLS
+   ============================================================ */
+const $=id=>document.getElementById(id);
+
+// build the Who dropdown from the roster
+(function fillRoster(){
+  const sel=$("f-name");
+  [...TEAM].sort((a,b)=>a.localeCompare(b)).forEach(n=>{
+    const o=document.createElement("option"); o.value=n; o.textContent=n; sel.appendChild(o);
+  });
+})();
+
+function updateSegs(){
+  document.querySelectorAll("#spanSeg .segbtn").forEach(b=> b.classList.toggle("active", parseInt(b.dataset.months)===months));
+  document.querySelectorAll("#viewSeg .segbtn").forEach(b=> b.classList.toggle("active", b.dataset.view===viewMode));
+}
+function renderAll(){ updateSegs(); render(); }
+
+async function addEntry(){
+  const name=$("f-name").value.trim();
+  const start=$("f-start").value;
+  const end=$("f-end").value||start;
+  const type=$("f-type").value;
+  const err=$("formErr"); err.textContent="";
+  if(!name){ err.textContent="Pick who's taking time off."; return; }
+  if(!start){ err.textContent="Pick a start date."; return; }
+  if(end<start){ err.textContent="The end date can't be before the start date."; return; }
+  const btn=$("addBtn"); btn.disabled=true; btn.textContent="Saving…";
+  try{
+    await store.add({id:uid(),name,start,end,type,note:""});
+    $("f-start").value=""; $("f-end").value="";
+    anchor=new Date(Number(start.slice(0,4)), Number(start.slice(5,7))-1, 1);
+    renderAll();
+  }catch(e){
+    err.textContent="Couldn't save: "+e.message;
+  }finally{
+    btn.disabled=false; btn.textContent="Add time off";
+  }
+}
+$("addBtn").onclick=addEntry;
+$("f-start").addEventListener("keydown",e=>{if(e.key==="Enter")addEntry();});
+$("f-end").addEventListener("keydown",e=>{if(e.key==="Enter")addEntry();});
+$("f-start").addEventListener("change",()=>{ if(!$("f-end").value) $("f-end").value=$("f-start").value; });
+$("prevP").onclick=()=>{ anchor=new Date(anchor.getFullYear(), anchor.getMonth()-months, 1); renderAll(); };
+$("nextP").onclick=()=>{ anchor=new Date(anchor.getFullYear(), anchor.getMonth()+months, 1); renderAll(); };
+$("todayBtn").onclick=()=>{ const n=new Date(); anchor=new Date(n.getFullYear(), n.getMonth(), 1); renderAll(); };
+document.querySelectorAll("#spanSeg .segbtn").forEach(b=> b.onclick=()=>{ months=parseInt(b.dataset.months); renderAll(); });
+document.querySelectorAll("#viewSeg .segbtn").forEach(b=> b.onclick=()=>{ viewMode=b.dataset.view; renderAll(); });
+$("bannerX").onclick=()=>{ $("banner").style.display="none"; };
+
+$("f-start").value=todayISO; $("f-end").value=todayISO;
+updateSegs();
+render();
+store.start();
+</script>
+</body>
+</html>

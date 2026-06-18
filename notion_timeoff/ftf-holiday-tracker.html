@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FTF — Time Off</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sand:#FBF6EC;        /* page */
+    --shell:#FFFFFF;       /* cards */
+    --sea:#0E7C86;         /* primary */
+    --sea-deep:#0A5C64;
+    --sky:#D8EFEC;         /* soft fills */
+    --coral:#FF7A59;       /* accent */
+    --ink:#243B43;         /* text */
+    --muted:#7C9098;       /* secondary text */
+    --line:#E7DFCD;        /* hairlines on sand */
+    --weekend:#F4EEE0;     /* weekend column wash */
+    --today:#FFE7C2;       /* today column */
+
+    /* leave types */
+    --t-vacation:#0E7C86;
+    --t-rtt:#5B8DEF;
+    --t-remote:#E0A100;
+    --t-sick:#C8607A;
+
+    --r:14px;
+    --shadow:0 1px 2px rgba(36,59,67,.06), 0 6px 20px rgba(36,59,67,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:"Nunito",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    color:var(--ink);
+    background:var(--sand);
+    -webkit-font-smoothing:antialiased;
+    padding:18px;
+    line-height:1.45;
+  }
+  .wrap{max-width:1000px;margin:0 auto}
+
+  /* ---- header ---- */
+  header.app{
+    display:flex;align-items:center;gap:14px;
+    flex-wrap:wrap;margin-bottom:14px;
+  }
+  .mark{
+    width:42px;height:42px;border-radius:12px;flex:0 0 auto;
+    background:radial-gradient(circle at 30% 28%, #FFD27A 0 24%, transparent 25%),
+               linear-gradient(160deg,var(--sea) 0%, var(--sea-deep) 100%);
+    box-shadow:var(--shadow);
+  }
+  h1{
+    font-family:"Fredoka",sans-serif;font-weight:700;
+    font-size:22px;margin:0;letter-spacing:.2px;
+  }
+  h1 small{display:block;font-family:"Nunito";font-weight:600;font-size:12.5px;color:var(--muted);letter-spacing:.3px;text-transform:uppercase}
+  .grow{flex:1 1 auto}
+
+  .pill{
+    display:inline-flex;align-items:center;gap:7px;
+    background:var(--shell);border:1px solid var(--line);
+    border-radius:999px;padding:7px 13px;font-weight:700;font-size:13px;
+    box-shadow:var(--shadow);
+  }
+  .pill .dot{width:8px;height:8px;border-radius:50%;background:var(--coral)}
+
+  /* ---- demo banner ---- */
+  .banner{
+    background:linear-gradient(0deg,var(--sky),var(--sky));
+    border:1px solid #Bfe0db;border-radius:var(--r);
+    padding:11px 14px;font-size:13.5px;font-weight:600;color:var(--sea-deep);
+    margin-bottom:14px;display:flex;gap:10px;align-items:flex-start;
+  }
+  .banner b{font-weight:800}
+  .banner .x{margin-left:auto;cursor:pointer;color:var(--sea-deep);opacity:.6;font-weight:800;border:0;background:none;font-size:15px}
+
+  /* ---- cards ---- */
+  .card{background:var(--shell);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+
+  /* ---- add form ---- */
+  .form{padding:14px;margin-bottom:14px}
+  .form-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr auto;gap:10px;align-items:end}
+  label.fld{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  input,select{
+    font-family:inherit;font-size:14px;font-weight:600;color:var(--ink);
+    background:var(--sand);border:1px solid var(--line);border-radius:10px;
+    padding:9px 11px;width:100%;
+  }
+  input:focus,select:focus{outline:2px solid var(--sea);outline-offset:1px;background:#fff}
+  .btn{
+    font-family:"Fredoka",sans-serif;font-weight:600;font-size:14.5px;
+    color:#fff;background:var(--sea);border:0;border-radius:10px;
+    padding:10px 18px;cursor:pointer;white-space:nowrap;transition:transform .06s ease, background .15s;
+    height:40px;
+  }
+  .btn:hover{background:var(--sea-deep)}
+  .btn:active{transform:translateY(1px)}
+  .err{color:var(--t-sick);font-size:12.5px;font-weight:700;margin:8px 2px 0;min-height:0}
+
+  /* ---- legend + month nav ---- */
+  .toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 2px 10px}
+  .nav{display:flex;align-items:center;gap:4px}
+  .nav button{
+    width:34px;height:34px;border-radius:10px;border:1px solid var(--line);
+    background:var(--shell);cursor:pointer;font-size:16px;color:var(--ink);font-weight:800;
+    display:grid;place-items:center;box-shadow:var(--shadow)
+  }
+  .nav button:hover{border-color:var(--sea);color:var(--sea)}
+  .month{font-family:"Fredoka";font-weight:600;font-size:18px;min-width:150px;text-align:center}
+  .today-btn{font-size:12.5px;font-weight:800;color:var(--sea);background:none;border:0;cursor:pointer;text-transform:uppercase;letter-spacing:.4px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-left:auto}
+  .lg{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--muted)}
+  .lg i{width:14px;height:10px;border-radius:4px;display:inline-block}
+
+  /* ---- timeline ---- */
+  .timeline{padding:6px 6px 10px;overflow-x:auto}
+  .tl-inner{min-width:680px}
+  .tl-head{display:grid;align-items:end;margin-bottom:4px}
+  .tl-row{display:grid;align-items:center;border-top:1px solid var(--line)}
+  .tl-namecol{width:128px}
+  .daynum{text-align:center;font-size:10.5px;font-weight:800;color:var(--muted);padding-bottom:4px}
+  .daynum span{display:block;font-size:9px;font-weight:700;opacity:.7}
+  .name{font-weight:800;font-size:13.5px;padding:9px 8px 9px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .track{position:relative;height:34px}
+  .cell{height:100%;border-left:1px solid #F2EAD7}
+  .cell.weekend{background:var(--weekend)}
+  .cell.today{background:var(--today)}
+  .bar{
+    position:absolute;top:6px;height:22px;border-radius:7px;
+    display:flex;align-items:center;padding:0 8px;
+    font-size:11.5px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;
+    cursor:default;box-shadow:0 1px 2px rgba(0,0,0,.12);
+  }
+  .bar.clip-l{border-top-left-radius:2px;border-bottom-left-radius:2px}
+  .bar.clip-r{border-top-right-radius:2px;border-bottom-right-radius:2px}
+  .empty{padding:34px 16px;text-align:center;color:var(--muted)}
+  .empty b{display:block;font-family:"Fredoka";font-size:16px;color:var(--ink);font-weight:600;margin-bottom:4px}
+
+  /* ---- list ---- */
+  .list{margin-top:14px;padding:6px 4px}
+  .list h2{font-family:"Fredoka";font-weight:600;font-size:15px;margin:8px 10px 6px}
+  .row{
+    display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:10px;
+  }
+  .row+.row{border-top:1px solid var(--line)}
+  .swatch{width:10px;height:28px;border-radius:5px;flex:0 0 auto}
+  .row .who{font-weight:800;font-size:14px}
+  .row .when{font-size:12.5px;color:var(--muted);font-weight:600}
+  .row .tag{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;padding:3px 8px;border-radius:999px}
+  .row .note{font-size:12.5px;color:var(--muted);font-weight:600;font-style:italic}
+  .row .del{margin-left:auto;border:0;background:none;cursor:pointer;color:var(--muted);font-weight:800;font-size:13px;padding:6px 8px;border-radius:8px}
+  .row .del:hover{color:var(--t-sick);background:#FBEEF1}
+
+  @media (max-width:680px){
+    .form-grid{grid-template-columns:1fr 1fr}
+    .form-grid .btn{grid-column:1 / -1}
+    .tl-namecol{width:96px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="app">
+    <div class="mark" aria-hidden="true"></div>
+    <h1>Time Off<small>First Things First</small></h1>
+    <div class="grow"></div>
+    <span class="pill" id="offNow"><span class="dot"></span><span id="offNowText">Nobody off today</span></span>
+  </header>
+
+  <div class="banner" id="banner">
+    <span>🏖️ <b>Demo mode.</b> Entries live only in this browser right now. To share one calendar across the whole team, connect Firebase — instructions are in the file comments at the top of <code>&lt;script&gt;</code>.</span>
+    <button class="x" id="bannerX" title="Hide">✕</button>
+  </div>
+
+  <!-- ADD FORM -->
+  <div class="card form">
+    <div class="form-grid">
+      <label class="fld">Who
+        <input id="f-name" placeholder="Your name" autocomplete="off">
+      </label>
+      <label class="fld">From
+        <input id="f-start" type="date">
+      </label>
+      <label class="fld">To
+        <input id="f-end" type="date">
+      </label>
+      <label class="fld">Type
+        <select id="f-type">
+          <option value="vacation">Vacation</option>
+          <option value="rtt">RTT</option>
+          <option value="remote">Remote</option>
+          <option value="sick">Sick</option>
+        </select>
+      </label>
+      <button class="btn" id="addBtn">Add time off</button>
+    </div>
+    <div class="err" id="formErr"></div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="nav">
+      <button id="prevM" title="Previous month">‹</button>
+      <div class="month" id="monthLabel">—</div>
+      <button id="nextM" title="Next month">›</button>
+    </div>
+    <button class="today-btn" id="todayBtn">Today</button>
+    <div class="legend">
+      <span class="lg"><i style="background:var(--t-vacation)"></i>Vacation</span>
+      <span class="lg"><i style="background:var(--t-rtt)"></i>RTT</span>
+      <span class="lg"><i style="background:var(--t-remote)"></i>Remote</span>
+      <span class="lg"><i style="background:var(--t-sick)"></i>Sick</span>
+    </div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="card timeline">
+    <div class="tl-inner" id="timeline"></div>
+  </div>
+
+  <!-- LIST -->
+  <div class="card list">
+    <h2>All upcoming time off</h2>
+    <div id="listBody"></div>
+  </div>
+
+</div>
+
+<script type="module">
+/* ============================================================
+   SHARE THIS CALENDAR ACROSS THE TEAM (optional but recommended)
+   ------------------------------------------------------------
+   By default this runs in "demo mode": entries are saved only in
+   the current browser. To make ONE shared calendar everyone edits:
+
+   1. Create a free Firebase project  -> https://console.firebase.google.com
+   2. Build > Firestore Database > Create database (start in test mode
+      while you set it up; lock down rules before wider rollout).
+   3. Project settings > "Your apps" > Web app > copy the config object.
+   4. Paste the values into firebaseConfig below.
+   Once apiKey + projectId are filled, the app auto-switches to the
+   shared Firestore calendar — no other change needed.
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: ""
+};
+
+/* ---------- types ---------- */
+const TYPES = {
+  vacation:{label:"Vacation", color:"#0E7C86"},
+  rtt:     {label:"RTT",      color:"#5B8DEF"},
+  remote:  {label:"Remote",   color:"#E0A100"},
+  sick:    {label:"Sick",     color:"#C8607A"}
+};
+
+/* ---------- date helpers (work in YYYY-MM-DD to avoid TZ drift) ---------- */
+const pad = n => String(n).padStart(2,"0");
+const toISO = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const todayISO = toISO(new Date());
+function fmtRange(s,e){
+  const o={day:"numeric",month:"short"};
+  const sd=new Date(s+"T00:00"), ed=new Date(e+"T00:00");
+  if(s===e) return sd.toLocaleDateString(undefined,o);
+  return `${sd.toLocaleDateString(undefined,o)} – ${ed.toLocaleDateString(undefined,{...o,year:ed.getFullYear()!==sd.getFullYear()?"numeric":undefined})}`;
+}
+const uid = () => (crypto?.randomUUID?.() || ("id"+Date.now()+Math.random().toString(16).slice(2)));
+
+/* ============================================================
+   STORAGE — Firebase if configured, else local (per-browser)
+   ============================================================ */
+function makeStore(){
+  const enabled = firebaseConfig.apiKey && firebaseConfig.projectId;
+  let cache=[]; let listeners=[];
+  const emit=()=>listeners.forEach(fn=>fn(cache.slice()));
+
+  if(!enabled){
+    document.getElementById("banner").style.display="";
+    try{ cache = JSON.parse(localStorage.getItem("ftf-timeoff")||"[]"); }catch{ cache=[]; }
+    const save=()=>{ try{ localStorage.setItem("ftf-timeoff",JSON.stringify(cache)); }catch{} };
+    return {
+      subscribe(fn){ listeners.push(fn); fn(cache.slice()); },
+      add(e){ cache.push(e); save(); emit(); },
+      remove(id){ cache=cache.filter(x=>x.id!==id); save(); emit(); }
+    };
+  }
+
+  // Firebase (shared) — loaded lazily so demo mode never touches the network.
+  document.getElementById("banner").style.display="none";
+  let api={};
+  (async()=>{
+    const {initializeApp} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+    const fs = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const app = initializeApp(firebaseConfig);
+    const db  = fs.getFirestore(app);
+    const col = fs.collection(db,"timeoff");
+    api.add    = (e)=> fs.setDoc(fs.doc(db,"timeoff",e.id), e);
+    api.remove = (id)=> fs.deleteDoc(fs.doc(db,"timeoff",id));
+    fs.onSnapshot(col, snap=>{ cache = snap.docs.map(d=>d.data()); emit(); });
+  })().catch(err=>{
+    console.error("Firebase failed, falling back to demo mode:",err);
+    document.getElementById("banner").style.display="";
+  });
+  return {
+    subscribe(fn){ listeners.push(fn); fn(cache.slice()); },
+    add(e){ (api.add?api.add(e):0); },
+    remove(id){ (api.remove?api.remove(id):0); }
+  };
+}
+const store = makeStore();
+
+/* ============================================================
+   STATE + RENDER
+   ============================================================ */
+let entries=[];
+let view = new Date(); view.setDate(1);
+
+store.subscribe(list=>{
+  entries = list.slice().sort((a,b)=> a.start<b.start?-1:a.start>b.start?1:0);
+  render();
+});
+
+function monthBounds(d){
+  const y=d.getFullYear(), m=d.getMonth();
+  const days=new Date(y,m+1,0).getDate();
+  return {y,m,days, first:`${y}-${pad(m+1)}-01`, last:`${y}-${pad(m+1)}-${pad(days)}`};
+}
+
+function render(){
+  renderOffNow();
+  renderTimeline();
+  renderList();
+  document.getElementById("monthLabel").textContent =
+    view.toLocaleDateString(undefined,{month:"long",year:"numeric"});
+}
+
+function renderOffNow(){
+  const off = entries.filter(e=> e.start<=todayISO && todayISO<=e.end).map(e=>e.name);
+  const el=document.getElementById("offNowText");
+  const uniq=[...new Set(off)];
+  el.textContent = uniq.length===0 ? "Nobody off today"
+    : uniq.length===1 ? `${uniq[0]} is off today`
+    : `${uniq.length} people off today`;
+}
+
+function renderTimeline(){
+  const {y,m,days,first,last}=monthBounds(view);
+  const inMonth = entries.filter(e=> e.start<=last && e.end>=first);
+  const names = [...new Set(inMonth.map(e=>e.name))].sort((a,b)=>a.localeCompare(b));
+  const cols = `var(--namecol,128px) repeat(${days}, minmax(20px,1fr))`;
+  const tl=document.getElementById("timeline");
+
+  if(names.length===0){
+    tl.innerHTML = `<div class="empty"><b>No time off this month</b>Add an entry above, then flip months with the arrows.</div>`;
+    return;
+  }
+
+  // header row of day numbers
+  let head = `<div class="tl-head" style="grid-template-columns:${cols}"><div class="tl-namecol"></div>`;
+  for(let day=1;day<=days;day++){
+    const dow=new Date(y,m,day).getDay();
+    const wd=["S","M","T","W","T","F","S"][dow];
+    head += `<div class="daynum">${day}<span>${wd}</span></div>`;
+  }
+  head += `</div>`;
+
+  // one row per person
+  let rows="";
+  for(const name of names){
+    rows += `<div class="tl-row" style="grid-template-columns:${cols}">`;
+    rows += `<div class="name" title="${esc(name)}">${esc(name)}</div>`;
+    rows += `<div class="track" style="grid-column:2 / -1;display:grid;grid-template-columns:repeat(${days},1fr)">`;
+    // background cells
+    for(let day=1;day<=days;day++){
+      const dow=new Date(y,m,day).getDay();
+      const iso=`${y}-${pad(m+1)}-${pad(day)}`;
+      const cls=["cell", (dow===0||dow===6)?"weekend":"", iso===todayISO?"today":""].join(" ").trim();
+      rows += `<div class="${cls}"></div>`;
+    }
+    // bars
+    for(const e of inMonth.filter(x=>x.name===name)){
+      const sDay = e.start<first ? 1 : Number(e.start.slice(8,10));
+      const eDay = e.end>last   ? days : Number(e.end.slice(8,10));
+      const clipL = e.start<first ? "clip-l":"";
+      const clipR = e.end>last ? "clip-r":"";
+      const c=TYPES[e.type]?.color||"#888";
+      const leftPct=(sDay-1)/days*100;
+      const widthPct=(eDay-sDay+1)/days*100;
+      const lbl = (eDay-sDay)>=2 ? (TYPES[e.type]?.label||"") : "";
+      rows += `<div class="bar ${clipL} ${clipR}" style="left:${leftPct}%;width:calc(${widthPct}% - 3px);background:${c}" title="${esc(name)} · ${esc(TYPES[e.type]?.label||"")} · ${fmtRange(e.start,e.end)}">${lbl}</div>`;
+    }
+    rows += `</div></div>`;
+  }
+  tl.innerHTML = head + rows;
+}
+
+function renderList(){
+  const future = entries.filter(e=> e.end>=todayISO);
+  const body=document.getElementById("listBody");
+  if(future.length===0){
+    body.innerHTML = `<div class="empty" style="padding:20px"><b>Nothing booked yet</b>Upcoming time off will show here.</div>`;
+    return;
+  }
+  body.innerHTML = future.map(e=>{
+    const t=TYPES[e.type]||{label:"",color:"#888"};
+    const tagBg = t.color+"22";
+    return `<div class="row">
+      <span class="swatch" style="background:${t.color}"></span>
+      <div>
+        <div class="who">${esc(e.name)}</div>
+        <div class="when">${fmtRange(e.start,e.end)}</div>
+      </div>
+      <span class="tag" style="background:${tagBg};color:${t.color}">${t.label}</span>
+      ${e.note?`<span class="note">“${esc(e.note)}”</span>`:""}
+      <button class="del" data-id="${e.id}" title="Remove">Remove</button>
+    </div>`;
+  }).join("");
+  body.querySelectorAll(".del").forEach(b=>b.onclick=()=>store.remove(b.dataset.id));
+}
+
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+/* ============================================================
+   FORM
+   ============================================================ */
+const $=id=>document.getElementById(id);
+function addEntry(){
+  const name=$("f-name").value.trim();
+  const start=$("f-start").value;
+  const end=$("f-end").value||start;
+  const type=$("f-type").value;
+  const err=$("formErr");
+  err.textContent="";
+  if(!name){ err.textContent="Add your name."; return; }
+  if(!start){ err.textContent="Pick a start date."; return; }
+  if(end<start){ err.textContent="The end date can't be before the start date."; return; }
+  store.add({id:uid(),name,start,end,type,note:""});
+  // keep the name, reset dates so adding several in a row is quick
+  $("f-start").value=""; $("f-end").value="";
+  // jump the calendar to the month of what was just added
+  view=new Date(start+"T00:00"); view.setDate(1); render();
+  err.textContent="";
+}
+$("addBtn").onclick=addEntry;
+["f-name","f-start","f-end"].forEach(id=>$(id).addEventListener("keydown",e=>{if(e.key==="Enter")addEntry();}));
+$("f-start").addEventListener("change",()=>{ if(!$("f-end").value) $("f-end").value=$("f-start").value; });
+
+$("prevM").onclick=()=>{view.setMonth(view.getMonth()-1);render();};
+$("nextM").onclick=()=>{view.setMonth(view.getMonth()+1);render();};
+$("todayBtn").onclick=()=>{view=new Date();view.setDate(1);render();};
+$("bannerX").onclick=()=>{$("banner").style.display="none";};
+
+// default the date pickers to today
+$("f-start").value=todayISO; $("f-end").value=todayISO;
+render();
+</script>
+</body>
+</html>
