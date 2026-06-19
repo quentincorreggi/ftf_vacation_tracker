@@ -222,18 +222,18 @@ const uid = () => (crypto?.randomUUID?.() || ("tmp"+Date.now()+Math.random().toS
 const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const byStart = (a,b)=> a.start<b.start?-1:a.start>b.start?1:(a.end<b.end?-1:1);
 
-/* sample data — only shown in preview mode, never when connected to Notion */
+/* sample data — only shown in preview mode, never when connected to storage */
 function sampleData(){
   const d=off=>{ const x=new Date(); x.setDate(x.getDate()+off); return toISO(x); };
   return [
-    {id:uid(), name:"Alex",   start:d(-2), end:d(2),  type:"vacation", note:"Surf trip"},
-    {id:uid(), name:"Maya",   start:d(0),  end:d(0),  type:"remote",   note:""},
-    {id:uid(), name:"Sam",    start:d(1),  end:d(5),  type:"vacation", note:""},
-    {id:uid(), name:"Jordan", start:d(-1), end:d(0),  type:"sick",     note:""},
-    {id:uid(), name:"Lou",    start:d(3),  end:d(8),  type:"rtt",      note:""},
-    {id:uid(), name:"Maya",   start:d(20), end:d(24), type:"vacation", note:""},
-    {id:uid(), name:"Alex",   start:d(34), end:d(45), type:"vacation", note:"Summer break"},
-    {id:uid(), name:"Sam",    start:d(60), end:d(62), type:"remote",   note:""}
+    {id:uid(), name:"Quentin",   start:d(-2), end:d(2),  type:"vacation", note:"Surf trip"},
+    {id:uid(), name:"Joana",     start:d(0),  end:d(0),  type:"remote",   note:""},
+    {id:uid(), name:"David",     start:d(1),  end:d(5),  type:"vacation", note:""},
+    {id:uid(), name:"Haydar",    start:d(-1), end:d(0),  type:"sick",     note:""},
+    {id:uid(), name:"Aleksandar",start:d(3),  end:d(8),  type:"rtt",      note:""},
+    {id:uid(), name:"Joana",     start:d(20), end:d(24), type:"vacation", note:""},
+    {id:uid(), name:"Quentin",   start:d(34), end:d(45), type:"vacation", note:"Summer break"},
+    {id:uid(), name:"David",     start:d(60), end:d(62), type:"remote",   note:""}
   ];
 }
 
