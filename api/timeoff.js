@@ -10,7 +10,8 @@
 const { createClient } = require("redis");
 
 const KEY = "timeoff";
-const VALID_TYPES = ["vacation", "rtt", "remote", "sick"];
+// Single time-off category — all entries are stored with this type.
+const OFF_TYPE = "timeoff";
 
 // Reuse the connection across warm invocations rather than reconnecting per call.
 let clientPromise = null;
@@ -71,7 +72,7 @@ module.exports = async (req, res) => {
         name: String(b.name).slice(0, 200),
         start: b.start,
         end: (b.end && b.end >= b.start) ? b.end : b.start,
-        type: VALID_TYPES.includes(b.type) ? b.type : "vacation",
+        type: OFF_TYPE,
         note: b.note ? String(b.note).slice(0, 500) : ""
       };
       await client.hSet(KEY, entry.id, JSON.stringify(entry));

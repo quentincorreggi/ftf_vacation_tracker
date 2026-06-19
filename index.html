@@ -12,7 +12,7 @@
     --sand:#FBF6EC; --shell:#FFFFFF; --sea:#0E7C86; --sea-deep:#0A5C64;
     --sky:#D8EFEC; --coral:#FF7A59; --ink:#243B43; --muted:#7C9098;
     --line:#E7DFCD; --band-alt:#FAF4E6; --wk:#F2EAD7;
-    --t-vacation:#0E7C86; --t-rtt:#5B8DEF; --t-remote:#E0A100; --t-sick:#C8607A;
+    --off:#0E7C86; --danger:#C8607A;
     --r:14px; --shadow:0 1px 2px rgba(36,59,67,.06), 0 6px 20px rgba(36,59,67,.06);
     --namew:128px;
   }
@@ -52,7 +52,7 @@
   .btn:hover{background:var(--sea-deep)}
   .btn:active{transform:translateY(1px)}
   .btn[disabled]{opacity:.6;cursor:default}
-  .err{color:var(--t-sick);font-size:12.5px;font-weight:700;margin:8px 2px 0;min-height:0}
+  .err{color:var(--danger);font-size:12.5px;font-weight:700;margin:8px 2px 0;min-height:0}
 
   .toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 2px 10px}
   .nav{display:flex;align-items:center;gap:4px}
@@ -63,9 +63,6 @@
   .seg{display:flex;gap:2px;background:var(--shell);border:1px solid var(--line);border-radius:10px;padding:2px;box-shadow:var(--shadow)}
   .segbtn{border:0;background:none;font-family:"Nunito";font-weight:800;font-size:12.5px;color:var(--muted);padding:6px 12px;border-radius:8px;cursor:pointer;white-space:nowrap}
   .segbtn.active{background:var(--sea);color:#fff}
-  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-left:auto}
-  .lg{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--muted)}
-  .lg i{width:14px;height:10px;border-radius:4px;display:inline-block}
 
   .timeline{padding:8px 8px 12px;overflow-x:auto}
   .tl-inner{min-width:760px}
@@ -94,10 +91,9 @@
   .swatch{width:10px;height:28px;border-radius:5px;flex:0 0 auto}
   .row .who{font-weight:800;font-size:14px}
   .row .when{font-size:12.5px;color:var(--muted);font-weight:600}
-  .row .tag{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;padding:3px 8px;border-radius:999px}
   .row .note{font-size:12.5px;color:var(--muted);font-weight:600;font-style:italic}
   .row .del{margin-left:auto;border:0;background:none;cursor:pointer;color:var(--muted);font-weight:800;font-size:13px;padding:6px 8px;border-radius:8px}
-  .row .del:hover{color:var(--t-sick);background:#FBEEF1}
+  .row .del:hover{color:var(--danger);background:#FBEEF1}
 
   .sync{font-size:11.5px;font-weight:700;color:var(--muted);margin:10px 4px 0;text-align:right}
   .sync b{color:var(--sea)}
@@ -137,14 +133,6 @@
       <label class="fld">To
         <input id="f-end" type="date">
       </label>
-      <label class="fld">Type
-        <select id="f-type">
-          <option value="vacation">Vacation</option>
-          <option value="rtt">RTT</option>
-          <option value="remote">Remote</option>
-          <option value="sick">Sick</option>
-        </select>
-      </label>
       <button class="btn" id="addBtn">Add time off</button>
     </div>
     <div class="err" id="formErr"></div>
@@ -165,12 +153,6 @@
       <button class="segbtn" data-months="1">Month</button>
       <button class="segbtn" data-months="3">Quarter</button>
       <button class="segbtn" data-months="6">6 mo</button>
-    </div>
-    <div class="legend">
-      <span class="lg"><i style="background:var(--t-vacation)"></i>Vacation</span>
-      <span class="lg"><i style="background:var(--t-rtt)"></i>RTT</span>
-      <span class="lg"><i style="background:var(--t-remote)"></i>Remote</span>
-      <span class="lg"><i style="background:var(--t-sick)"></i>Sick</span>
     </div>
   </div>
 
@@ -215,8 +197,8 @@ const TEAM = ["Quentin","Ambroise","David","Haydar","Tahir","Aleksandar","Andrea
 const API_BASE = "";
 const POLL_MS = 30000;
 
-const TYPES = { vacation:{label:"Vacation"}, rtt:{label:"RTT"}, remote:{label:"Remote"}, sick:{label:"Sick"} };
-const TYPE_COLOR = { vacation:"#0E7C86", rtt:"#5B8DEF", remote:"#E0A100", sick:"#C8607A" };
+// Single time-off category — every entry uses this one color.
+const OFF_COLOR = "#0E7C86";
 
 /* ---------- date helpers ---------- */
 const pad = n => String(n).padStart(2,"0");
@@ -237,14 +219,14 @@ const byStart = (a,b)=> a.start<b.start?-1:a.start>b.start?1:(a.end<b.end?-1:1);
 function sampleData(){
   const d=off=>{ const x=new Date(); x.setDate(x.getDate()+off); return toISO(x); };
   return [
-    {id:uid(), name:"Quentin",   start:d(-2), end:d(2),  type:"vacation", note:"Surf trip"},
-    {id:uid(), name:"Joana",     start:d(0),  end:d(0),  type:"remote",   note:""},
-    {id:uid(), name:"David",     start:d(1),  end:d(5),  type:"vacation", note:""},
-    {id:uid(), name:"Haydar",    start:d(-1), end:d(0),  type:"sick",     note:""},
-    {id:uid(), name:"Aleksandar",start:d(3),  end:d(8),  type:"rtt",      note:""},
-    {id:uid(), name:"Joana",     start:d(20), end:d(24), type:"vacation", note:""},
-    {id:uid(), name:"Quentin",   start:d(34), end:d(45), type:"vacation", note:"Summer break"},
-    {id:uid(), name:"David",     start:d(60), end:d(62), type:"remote",   note:""}
+    {id:uid(), name:"Quentin",   start:d(-2), end:d(2),  type:"timeoff", note:"Surf trip"},
+    {id:uid(), name:"Joana",     start:d(0),  end:d(0),  type:"timeoff", note:""},
+    {id:uid(), name:"David",     start:d(1),  end:d(5),  type:"timeoff", note:""},
+    {id:uid(), name:"Haydar",    start:d(-1), end:d(0),  type:"timeoff", note:""},
+    {id:uid(), name:"Aleksandar",start:d(3),  end:d(8),  type:"timeoff", note:""},
+    {id:uid(), name:"Joana",     start:d(20), end:d(24), type:"timeoff", note:""},
+    {id:uid(), name:"Quentin",   start:d(34), end:d(45), type:"timeoff", note:"Summer break"},
+    {id:uid(), name:"David",     start:d(60), end:d(62), type:"timeoff", note:""}
   ];
 }
 
@@ -394,9 +376,9 @@ function renderTimeline(){
   function barHTML(it, top, labelText){
     const s=it.start<from?from:it.start, e=it.end>to?to:it.end;
     const left=pct(s), w=(dnum(e)-dnum(s)+1)/total*100;
-    const c=TYPE_COLOR[it.type]||"#888";
+    const c=OFF_COLOR;
     const clipL=it.start<from?"clip-l":"", clipR=it.end>to?"clip-r":"";
-    return `<div class="bar ${clipL} ${clipR}" style="left:${left}%;width:calc(${w}% - 3px);top:${top}px;background:${c}" title="${esc(it.name)} · ${esc(TYPES[it.type]?.label||"")} · ${fmtRange(it.start,it.end)}">${esc(labelText)}</div>`;
+    return `<div class="bar ${clipL} ${clipR}" style="left:${left}%;width:calc(${w}% - 3px);top:${top}px;background:${c}" title="${esc(it.name)} · ${fmtRange(it.start,it.end)}">${esc(labelText)}</div>`;
   }
   const daysOf=it=>{ const s=it.start<from?from:it.start, e=it.end>to?to:it.end; return dnum(e)-dnum(s)+1; };
 
@@ -416,7 +398,7 @@ function renderTimeline(){
       const rowH=padV*2+laneCount*barH+(laneCount-1)*gap;
       let bars="";
       for(const {it,li} of placed){
-        const lbl = daysOf(it)>=4 ? (TYPES[it.type]?.label||"") : "";
+        const lbl = daysOf(it)>=4 ? fmtRange(it.start,it.end) : "";
         bars+=barHTML(it, padV+li*(barH+gap), lbl);
       }
       rows+=`<div class="tl-row"><div class="name" title="${esc(name)}">${esc(name)}</div><div class="track" style="height:${rowH}px">${grid}${bars}</div></div>`;
@@ -451,11 +433,9 @@ function renderList(){
     return;
   }
   body.innerHTML=future.map(e=>{
-    const color=TYPE_COLOR[e.type]||"#888", label=TYPES[e.type]?.label||"";
     return `<div class="row">
-      <span class="swatch" style="background:${color}"></span>
+      <span class="swatch" style="background:${OFF_COLOR}"></span>
       <div><div class="who">${esc(e.name)}</div><div class="when">${fmtRange(e.start,e.end)}</div></div>
-      <span class="tag" style="background:${color}22;color:${color}">${label}</span>
       ${e.note?`<span class="note">“${esc(e.note)}”</span>`:""}
       <button class="del" data-id="${esc(e.id)}" title="Remove">Remove</button>
     </div>`;
@@ -486,14 +466,13 @@ async function addEntry(){
   const name=$("f-name").value.trim();
   const start=$("f-start").value;
   const end=$("f-end").value||start;
-  const type=$("f-type").value;
   const err=$("formErr"); err.textContent="";
   if(!name){ err.textContent="Pick who's taking time off."; return; }
   if(!start){ err.textContent="Pick a start date."; return; }
   if(end<start){ err.textContent="The end date can't be before the start date."; return; }
   const btn=$("addBtn"); btn.disabled=true; btn.textContent="Saving…";
   try{
-    await store.add({id:uid(),name,start,end,type,note:""});
+    await store.add({id:uid(),name,start,end,type:"timeoff",note:""});
     $("f-start").value=""; $("f-end").value="";
     anchor=new Date(Number(start.slice(0,4)), Number(start.slice(5,7))-1, 1);
     renderAll();
