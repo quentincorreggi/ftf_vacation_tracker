@@ -67,8 +67,8 @@ The same app supports two embeds via URL parameters:
 https://YOUR-APP.vercel.app/?view=team
 ```
 
-**Roadmap page** — read-only timeline only (no add form, list, or toggles),
-aligned to a roadmap window:
+**Roadmap page** — timeline only (no add form or list, but date and
+Person/Team controls stay), aligned to a roadmap window:
 ```
 https://YOUR-APP.vercel.app/?embed=timeline&months=3&start=2026-07-01
 ```
@@ -80,8 +80,8 @@ https://YOUR-APP.vercel.app/?embed=timeline&months=3&start=2026-07-01
 - **Team roster** (the "Who" dropdown): edit the `TEAM` array near the top of the
   `<script>` in `index.html`, then redeploy.
 - **View on load:** add `?view=team` to the embed URL to open in Team view.
-- **Roadmap embed:** add `?embed=timeline` for a read-only timeline (hides the
-  add form, list, banner, and Person/Team toggle).
+- **Roadmap embed:** add `?embed=timeline` for a timeline-only view (hides the
+  add form, list, and banner; keeps the date and Person/Team controls).
 - **Access:** as built, anyone with the URL can read/write. For an internal tool
   behind a shared Notion page that's usually fine. To lock it down, set
   `ALLOWED_ORIGIN` to your Vercel URL, or enable Vercel's password protection
