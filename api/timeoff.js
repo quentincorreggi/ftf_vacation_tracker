@@ -1,16 +1,30 @@
-// api/timeoff.js — Vercel serverless function (CommonJS, zero dependencies)
-// Stores team time-off in Vercel-managed Redis (Upstash, via the Vercel Marketplace).
+// api/timeoff.js — Vercel serverless function
+// Stores team time-off in Redis, connecting via a standard connection string
+// (REDIS_URL / KV_URL / REDIS_TLS_URL). Works with any Redis store added through
+// the Vercel Marketplace — Upstash, Redis Cloud, Vercel's own Redis, etc.
 //
-// SETUP: in the Vercel dashboard, open your project > Storage > add a Redis
-// (Upstash) integration on the free plan, and connect it to this project.
-// Vercel injects the credentials automatically. This function reads whichever
-// pair the integration provides:
-//     KV_REST_API_URL        + KV_REST_API_TOKEN          (Vercel KV-compatible), or
-//     UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN
-// Optional: ALLOWED_ORIGIN to restrict which site may call this API.
+// SETUP: connect a Redis store to the project in the Vercel dashboard, then
+// redeploy (vercel --prod) so the function picks up the injected connection
+// string. Optional: ALLOWED_ORIGIN to restrict which site may call this API.
+
+const { createClient } = require("redis");
 
 const KEY = "timeoff";
 const VALID_TYPES = ["vacation", "rtt", "remote", "sick"];
+
+// Reuse the connection across warm invocations rather than reconnecting per call.
+let clientPromise = null;
+function getClient(url) {
+  if (!clientPromise) {
+    const client = createClient({ url });
+    client.on("error", () => {}); // swallow transient errors so they don't crash the function
+    clientPromise = client
+      .connect()
+      .then(() => client)
+      .catch((e) => { clientPromise = null; throw e; }); // allow a retry next request
+  }
+  return clientPromise;
+}
 
 module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", process.env.ALLOWED_ORIGIN || "*");
@@ -19,38 +33,30 @@ module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
   if (req.method === "OPTIONS") { res.status(204).end(); return; }
 
-  const creds = findRedisCreds(process.env);
-  if (!creds) {
-    // Report which Redis-ish env keys ARE present (names only, never values) so
-    // configuration problems are diagnosable straight from this endpoint.
+  const url =
+    process.env.REDIS_URL ||
+    process.env.KV_URL ||
+    process.env.REDIS_TLS_URL ||
+    process.env.REDIS_URI;
+  if (!url) {
+    // Report which Redis-ish env keys ARE present (names only, never values).
     const seen = Object.keys(process.env).filter(k => /REDIS|UPSTASH|KV_/i.test(k)).sort();
     res.status(500).json({
-      error: "Storage not configured: connect a Redis integration in Vercel and REDEPLOY (vercel --prod) so the function picks up the credentials.",
+      error: "Storage not configured: connect a Redis integration in Vercel and REDEPLOY (vercel --prod) so the function picks up the connection string.",
       redisEnvKeysFound: seen
     });
     return;
   }
-  const RURL = creds.url, RTOKEN = creds.token;
-
-  // minimal Upstash REST client (command as a JSON array)
-  const redis = async (cmd) => {
-    const r = await fetch(RURL, {
-      method: "POST",
-      headers: { Authorization: "Bearer " + RTOKEN, "Content-Type": "application/json" },
-      body: JSON.stringify(cmd)
-    });
-    const data = await r.json().catch(() => ({}));
-    if (!r.ok || data.error) throw new Error(data.error || ("Redis HTTP " + r.status));
-    return data.result;
-  };
 
   try {
+    const client = await getClient(url);
+
     // ---- LIST ----
     if (req.method === "GET") {
-      const flat = (await redis(["HGETALL", KEY])) || []; // [field, value, field, value, ...]
+      const obj = (await client.hGetAll(KEY)) || {}; // { field: jsonString, ... }
       const out = [];
-      for (let i = 0; i < flat.length; i += 2) {
-        try { out.push(JSON.parse(flat[i + 1])); } catch (_) {}
+      for (const v of Object.values(obj)) {
+        try { out.push(JSON.parse(v)); } catch (_) {}
       }
       res.status(200).json(out);
       return;
@@ -68,7 +74,7 @@ module.exports = async (req, res) => {
         type: VALID_TYPES.includes(b.type) ? b.type : "vacation",
         note: b.note ? String(b.note).slice(0, 500) : ""
       };
-      await redis(["HSET", KEY, entry.id, JSON.stringify(entry)]);
+      await client.hSet(KEY, entry.id, JSON.stringify(entry));
       res.status(200).json(entry);
       return;
     }
@@ -77,7 +83,7 @@ module.exports = async (req, res) => {
     if (req.method === "DELETE") {
       const id = (req.query && req.query.id) || readBody(req).id;
       if (!id) { res.status(400).json({ error: "id required" }); return; }
-      await redis(["HDEL", KEY, id]);
+      await client.hDel(KEY, id);
       res.status(200).json({ ok: true });
       return;
     }
@@ -87,33 +93,6 @@ module.exports = async (req, res) => {
     res.status(500).json({ error: String((e && e.message) || e) });
   }
 };
-
-// Find the Upstash/Redis REST URL + token regardless of how Vercel named the
-// vars. Vercel's Marketplace integrations sometimes add a prefix (e.g.
-// STORAGE_, or the store's name) to the classic KV_/UPSTASH_ names.
-function findRedisCreds(env) {
-  // 1) The well-known pairs, tried as-is.
-  const known = [
-    ["KV_REST_API_URL", "KV_REST_API_TOKEN"],
-    ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"]
-  ];
-  for (const [u, t] of known) {
-    if (env[u] && env[t]) return { url: env[u], token: env[t] };
-  }
-  // 2) Discover by suffix, tolerating any prefix. Match the token to the URL by
-  //    their shared prefix so we don't pair creds from two different stores.
-  const urlKey = Object.keys(env).find(
-    k => /(REST_API_URL|REDIS_REST_URL)$/.test(k) && /^https?:\/\//.test(env[k] || "")
-  );
-  if (urlKey) {
-    const prefix = urlKey.replace(/(REST_API_URL|REDIS_REST_URL)$/, "");
-    const tokenKey =
-      Object.keys(env).find(k => k.startsWith(prefix) && /(REST_API_TOKEN|REDIS_REST_TOKEN)$/.test(k)) ||
-      Object.keys(env).find(k => /(REST_API_TOKEN|REDIS_REST_TOKEN)$/.test(k));
-    if (tokenKey && env[tokenKey]) return { url: env[urlKey], token: env[tokenKey] };
-  }
-  return null;
-}
 
 function readBody(req) {
   if (!req.body) return {};
