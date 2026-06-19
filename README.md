@@ -68,10 +68,13 @@ https://YOUR-APP.vercel.app/?view=team
 ```
 
 **Roadmap page** — timeline only (no add form or list, but date and
-Person/Team controls stay), aligned to a roadmap window:
+Person/Team controls stay). Use `start=current` (or just omit `start`) so it
+always opens on the current month:
 ```
-https://YOUR-APP.vercel.app/?embed=timeline&months=3&start=2026-07-01
+https://YOUR-APP.vercel.app/?embed=timeline&months=3&start=current
 ```
+`start` also accepts a fixed date (`2026-07-01`) to pin a specific window, or
+`now`/`today` as aliases for `current`.
 
 ---
 

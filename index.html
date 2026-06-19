@@ -190,6 +190,9 @@ const TEAM = ["Quentin","Ambroise","David","Haydar","Tahir","Aleksandar","Andrea
    URL PARAMETERS on the embed:
      ?view=team                     -> open in Team (everyone-at-once) view
      ?months=3&start=2026-07-01     -> Jul–Sep 2026
+     ?months=3&start=current        -> 3 months from the current month (also
+                                       accepts now/today; omitting start does
+                                       the same thing)
      ?from=2026-07-01&to=2026-09-30 -> same, explicit range
      ?embed=timeline                -> timeline only (no add form / list); keeps
                                        date + Person/Team controls. Roadmap page.
@@ -289,11 +292,15 @@ let months = 3, anchor, viewMode = "person";
   const qs=new URLSearchParams(location.search);
   const mp=parseInt(qs.get("months")); if(mp) months=Math.min(12,Math.max(1,mp));
   const fromP=qs.get("from"), startP=qs.get("start");
-  let base = fromP ? new Date(fromP+"T00:00") : startP ? new Date(startP+"T00:00") : new Date();
+  // A date param may be a YYYY-MM-DD value or the keyword current/now/today,
+  // which resolves to the present month (handy for an embed that should always
+  // open on "now" without a hardcoded date).
+  const parseDateParam = v => !v ? null : /^(current|now|today)$/i.test(v.trim()) ? new Date() : new Date(v+"T00:00");
+  let base = parseDateParam(fromP) || parseDateParam(startP) || new Date();
   if(isNaN(base)) base=new Date();
   anchor=new Date(base.getFullYear(), base.getMonth(), 1);
   const toP=qs.get("to");
-  if(fromP && toP){ const t=new Date(toP+"T00:00"); if(!isNaN(t)) months=Math.max(1,(t.getFullYear()-base.getFullYear())*12+(t.getMonth()-base.getMonth())+1); }
+  if(fromP && toP){ const t=parseDateParam(toP); if(t && !isNaN(t)) months=Math.max(1,(t.getFullYear()-base.getFullYear())*12+(t.getMonth()-base.getMonth())+1); }
   if(qs.get("view")==="team") viewMode="team";
   // Read-only timeline mode for the roadmap embed. Defaults to the team
   // (everyone-at-once) view unless an explicit view was requested.
