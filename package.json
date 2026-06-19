@@ -1,0 +1,9 @@
+{
+  "name": "ftf-vacation-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FTF Time Off — team holiday tracker (Vercel + Redis)",
+  "dependencies": {
+    "redis": "^4.7.1"
+  }
+}

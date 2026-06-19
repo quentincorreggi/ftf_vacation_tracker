@@ -37,13 +37,16 @@ anything by hand).
 
 > CLI alternative: `vercel install upstash` from the project folder.
 
-The function auto-detects the Redis REST URL + token from the environment. It
-recognizes the classic `KV_REST_API_URL`/`KV_REST_API_TOKEN` and
-`UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` pairs, and also tolerates a
-prefix (e.g. `STORAGE_…`) that some Vercel Marketplace integrations add. If
-storage is still not detected, open `/api/timeoff` directly — the error
-response lists the Redis-related env var names it can see, which makes
+The function connects using a standard Redis connection string, reading
+`REDIS_URL` (or `KV_URL` / `REDIS_TLS_URL` / `REDIS_URI`). Every Redis store on
+the Vercel Marketplace — Upstash, Redis Cloud, Vercel's own Redis — injects one
+of these, so no manual setup is needed beyond connecting the store and
+redeploying. If storage is still not detected, open `/api/timeoff` directly —
+the error response lists the Redis-related env var names it can see, which makes
 mismatches obvious.
+
+> Note: the project now has one dependency (`redis`). Vercel installs it
+> automatically from `package.json` during the build — nothing to do by hand.
 
 ### 3. Redeploy so the function sees the new credentials
 ```bash
