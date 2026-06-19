@@ -5,9 +5,10 @@ a small serverless function, and a Vercel-managed Redis store for the data.
 No Notion integration or admin rights required.
 
 ```
-notion-timeoff/
+ftf_vacation_tracker/
 ├─ index.html        the app (served at / )
 ├─ api/timeoff.js    serverless API: list / add / remove  (served at /api/timeoff )
+├─ vercel.json       Vercel config (clean URLs, no-store on /api)
 └─ README.md
 ```
 
@@ -36,10 +37,13 @@ anything by hand).
 
 > CLI alternative: `vercel install upstash` from the project folder.
 
-The function looks for either `KV_REST_API_URL` + `KV_REST_API_TOKEN` or
-`UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`. The Upstash integration
-provides one of these pairs. If yours uses different names, add aliases under
-Settings → Environment Variables.
+The function auto-detects the Redis REST URL + token from the environment. It
+recognizes the classic `KV_REST_API_URL`/`KV_REST_API_TOKEN` and
+`UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` pairs, and also tolerates a
+prefix (e.g. `STORAGE_…`) that some Vercel Marketplace integrations add. If
+storage is still not detected, open `/api/timeoff` directly — the error
+response lists the Redis-related env var names it can see, which makes
+mismatches obvious.
 
 ### 3. Redeploy so the function sees the new credentials
 ```bash

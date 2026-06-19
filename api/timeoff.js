@@ -19,12 +19,18 @@ module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
   if (req.method === "OPTIONS") { res.status(204).end(); return; }
 
-  const RURL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-  const RTOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!RURL || !RTOKEN) {
-    res.status(500).json({ error: "Storage not configured: add a Redis integration in Vercel and redeploy." });
+  const creds = findRedisCreds(process.env);
+  if (!creds) {
+    // Report which Redis-ish env keys ARE present (names only, never values) so
+    // configuration problems are diagnosable straight from this endpoint.
+    const seen = Object.keys(process.env).filter(k => /REDIS|UPSTASH|KV_/i.test(k)).sort();
+    res.status(500).json({
+      error: "Storage not configured: connect a Redis integration in Vercel and REDEPLOY (vercel --prod) so the function picks up the credentials.",
+      redisEnvKeysFound: seen
+    });
     return;
   }
+  const RURL = creds.url, RTOKEN = creds.token;
 
   // minimal Upstash REST client (command as a JSON array)
   const redis = async (cmd) => {
@@ -81,6 +87,33 @@ module.exports = async (req, res) => {
     res.status(500).json({ error: String((e && e.message) || e) });
   }
 };
+
+// Find the Upstash/Redis REST URL + token regardless of how Vercel named the
+// vars. Vercel's Marketplace integrations sometimes add a prefix (e.g.
+// STORAGE_, or the store's name) to the classic KV_/UPSTASH_ names.
+function findRedisCreds(env) {
+  // 1) The well-known pairs, tried as-is.
+  const known = [
+    ["KV_REST_API_URL", "KV_REST_API_TOKEN"],
+    ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"]
+  ];
+  for (const [u, t] of known) {
+    if (env[u] && env[t]) return { url: env[u], token: env[t] };
+  }
+  // 2) Discover by suffix, tolerating any prefix. Match the token to the URL by
+  //    their shared prefix so we don't pair creds from two different stores.
+  const urlKey = Object.keys(env).find(
+    k => /(REST_API_URL|REDIS_REST_URL)$/.test(k) && /^https?:\/\//.test(env[k] || "")
+  );
+  if (urlKey) {
+    const prefix = urlKey.replace(/(REST_API_URL|REDIS_REST_URL)$/, "");
+    const tokenKey =
+      Object.keys(env).find(k => k.startsWith(prefix) && /(REST_API_TOKEN|REDIS_REST_TOKEN)$/.test(k)) ||
+      Object.keys(env).find(k => /(REST_API_TOKEN|REDIS_REST_TOKEN)$/.test(k));
+    if (tokenKey && env[tokenKey]) return { url: env[urlKey], token: env[tokenKey] };
+  }
+  return null;
+}
 
 function readBody(req) {
   if (!req.body) return {};
