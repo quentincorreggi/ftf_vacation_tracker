@@ -60,10 +60,17 @@ the data persisted to Redis, not just the browser).
 
 ### 5. Embed in Notion
 On your Notion page, type `/embed`, paste the Vercel URL, and resize the block.
-To line it up with your roadmap timeline, append the window, e.g.:
+The same app supports two embeds via URL parameters:
 
+**Booking page** — full app (add + see everyone). Open in Team view:
 ```
-https://YOUR-APP.vercel.app/?months=3&start=2026-07-01
+https://YOUR-APP.vercel.app/?view=team
+```
+
+**Roadmap page** — read-only timeline only (no add form, list, or toggles),
+aligned to a roadmap window:
+```
+https://YOUR-APP.vercel.app/?embed=timeline&months=3&start=2026-07-01
 ```
 
 ---
@@ -73,6 +80,8 @@ https://YOUR-APP.vercel.app/?months=3&start=2026-07-01
 - **Team roster** (the "Who" dropdown): edit the `TEAM` array near the top of the
   `<script>` in `index.html`, then redeploy.
 - **View on load:** add `?view=team` to the embed URL to open in Team view.
+- **Roadmap embed:** add `?embed=timeline` for a read-only timeline (hides the
+  add form, list, banner, and Person/Team toggle).
 - **Access:** as built, anyone with the URL can read/write. For an internal tool
   behind a shared Notion page that's usually fine. To lock it down, set
   `ALLOWED_ORIGIN` to your Vercel URL, or enable Vercel's password protection
