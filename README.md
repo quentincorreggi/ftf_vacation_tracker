@@ -5,9 +5,10 @@ a small serverless function, and a Vercel-managed Redis store for the data.
 No Notion integration or admin rights required.
 
 ```
-notion-timeoff/
+ftf_vacation_tracker/
 ├─ index.html        the app (served at / )
 ├─ api/timeoff.js    serverless API: list / add / remove  (served at /api/timeoff )
+├─ vercel.json       Vercel config (clean URLs, no-store on /api)
 └─ README.md
 ```
 
