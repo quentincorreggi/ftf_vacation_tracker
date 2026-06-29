@@ -90,9 +90,44 @@ https://YOUR-APP.vercel.app/?embed=timeline&months=3&start=current
   `ALLOWED_ORIGIN` to your Vercel URL, or enable Vercel's password protection
   (Project → Settings → Deployment Protection).
 
+## Backups & restore
+
+A daily snapshot of all entries is taken automatically via a Vercel Cron job
+(`/api/snapshot`, configured in `vercel.json`). The last **60 days** are kept;
+older snapshots are pruned automatically.
+
+**Setup (required for snapshots to run):** in Vercel → project → Settings →
+Environment Variables, add a `CRON_SECRET` (any long random string). Vercel
+sends it automatically with the daily cron request; without it the endpoint
+refuses unauthenticated calls (so it stays private). Optionally also set
+`SNAPSHOT_SECRET` for manual calls. Redeploy after adding it.
+
+Manage snapshots (pass the secret as `?key=` or an `Authorization: Bearer`
+header):
+
+```bash
+# list available snapshot dates
+curl "https://YOUR-APP.vercel.app/api/snapshot?action=list&key=SECRET"
+
+# inspect one
+curl "https://YOUR-APP.vercel.app/api/snapshot?action=get&date=2026-06-29&key=SECRET"
+
+# restore the live data to a given day (backs up the current state first)
+curl -X POST "https://YOUR-APP.vercel.app/api/snapshot?action=restore&date=2026-06-29&key=SECRET"
+```
+
+A restore replaces the live data with that day's snapshot, but first saves the
+current state under a `_prerestore` slot, so a mistaken restore is reversible.
+
+> **Important:** these snapshots live in the *same* Redis as the live data, so
+> they protect against accidental edits/removes — but they would **not** survive
+> a full database wipe. For that, also enable your Redis provider's own backups
+> (e.g. Upstash → database → Backups), or ask for off-site snapshots committed
+> to this repo.
+
 ## Notes
 
-- "Remove" deletes the entry from Redis. There's no trash/undo, unlike the
-  earlier Notion design — removed entries are gone.
+- "Remove" deletes the live entry from Redis (no in-app undo), but the daily
+  snapshot above lets you roll back to a previous day.
 - The app polls every 30s to pick up teammates' changes, and refreshes
   immediately after you add or remove something.

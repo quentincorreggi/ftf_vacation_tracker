@@ -1,31 +1,11 @@
-// api/timeoff.js — Vercel serverless function
-// Stores team time-off in Redis, connecting via a standard connection string
-// (REDIS_URL / KV_URL / REDIS_TLS_URL). Works with any Redis store added through
-// the Vercel Marketplace — Upstash, Redis Cloud, Vercel's own Redis, etc.
-//
-// SETUP: connect a Redis store to the project in the Vercel dashboard, then
-// redeploy (vercel --prod) so the function picks up the injected connection
-// string. Optional: ALLOWED_ORIGIN to restrict which site may call this API.
+// api/timeoff.js — Vercel serverless function (list / add / remove team time-off).
+// Stores entries in Redis, connecting via a standard connection string. See
+// lib/redis.js for the connection details. Optional: ALLOWED_ORIGIN to restrict
+// which site may call this API.
 
-const { createClient } = require("redis");
+const { getClient, redisUrl, readEntries, KEY } = require("../lib/redis");
 
-const KEY = "timeoff";
-// Single time-off category — all entries are stored with this type.
-const OFF_TYPE = "timeoff";
-
-// Reuse the connection across warm invocations rather than reconnecting per call.
-let clientPromise = null;
-function getClient(url) {
-  if (!clientPromise) {
-    const client = createClient({ url });
-    client.on("error", () => {}); // swallow transient errors so they don't crash the function
-    clientPromise = client
-      .connect()
-      .then(() => client)
-      .catch((e) => { clientPromise = null; throw e; }); // allow a retry next request
-  }
-  return clientPromise;
-}
+const OFF_TYPE = "timeoff"; // single time-off category
 
 module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", process.env.ALLOWED_ORIGIN || "*");
@@ -34,12 +14,7 @@ module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
   if (req.method === "OPTIONS") { res.status(204).end(); return; }
 
-  const url =
-    process.env.REDIS_URL ||
-    process.env.KV_URL ||
-    process.env.REDIS_TLS_URL ||
-    process.env.REDIS_URI;
-  if (!url) {
+  if (!redisUrl()) {
     // Report which Redis-ish env keys ARE present (names only, never values).
     const seen = Object.keys(process.env).filter(k => /REDIS|UPSTASH|KV_/i.test(k)).sort();
     res.status(500).json({
@@ -50,16 +25,11 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const client = await getClient(url);
+    const client = await getClient();
 
     // ---- LIST ----
     if (req.method === "GET") {
-      const obj = (await client.hGetAll(KEY)) || {}; // { field: jsonString, ... }
-      const out = [];
-      for (const v of Object.values(obj)) {
-        try { out.push(JSON.parse(v)); } catch (_) {}
-      }
-      res.status(200).json(out);
+      res.status(200).json(await readEntries(client));
       return;
     }
 
